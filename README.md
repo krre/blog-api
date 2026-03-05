@@ -1,2 +1,2 @@
-# blog-api
-API server for my blog
+# Blog API
+API server for my [blog](https://blog.m31.one).
