@@ -1,3 +1,5 @@
+use blog::core::Application;
+
 fn main() {
-    println!("Server running...");
+    Application::new().run();
 }
