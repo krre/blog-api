@@ -1,5 +1,7 @@
 use blog::core::Application;
 
-fn main() {
-    Application::new().run();
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    Application::new().run().await?;
+    Ok(())
 }
