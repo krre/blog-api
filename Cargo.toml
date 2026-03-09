@@ -10,4 +10,6 @@ path = "src/blog/lib.rs"
 
 [dependencies]
 axum = "0.8.8"
+envy = "0.4.2"
+serde = { version = "1.0.228", features = ["derive"] }
 tokio = { version = "1.50.0", features = ["full"] }
