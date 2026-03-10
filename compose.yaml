@@ -1,8 +1,9 @@
 services:
-  server:
+  blog:
     build:
       context: .
       target: final
+    image: krre/blog-api:v1.0
     environment:
       - HOST=0.0.0.0
       - PORT=3000
