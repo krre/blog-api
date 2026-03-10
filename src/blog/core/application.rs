@@ -1,4 +1,4 @@
-use axum::{Router, routing::get};
+use axum::Router;
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
@@ -25,16 +25,13 @@ impl Application {
     }
 
     pub async fn run(&self) -> Result<(), Box<dyn std::error::Error>> {
-        let app = Router::new().route("/", get(handler));
         let listener =
             tokio::net::TcpListener::bind(format!("{}:{}", self.config.host, self.config.port))
                 .await?;
+        let router = Router::new();
+
         println!("listening on {}", listener.local_addr()?);
-        axum::serve(listener, app).await?;
+        axum::serve(listener, router.into_make_service()).await?;
         Ok(())
     }
-}
-
-async fn handler() -> &'static str {
-    "Under construction"
 }
