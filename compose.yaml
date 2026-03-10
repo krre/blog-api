@@ -1,5 +1,5 @@
 services:
-  blog:
+  app:
     build:
       context: .
       target: final
