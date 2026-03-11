@@ -3,10 +3,10 @@ services:
     build:
       context: .
       target: final
-    image: krre/blog-api:v1.0
+    image: krre/blog-api:v1.1
     environment:
       - HOST=0.0.0.0
       - PORT=3000
       - RUST_LOG=info
     ports:
-      - 4010:3000
+      - 127.0.0.1:4010:3000
