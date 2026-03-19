@@ -1,0 +1,6 @@
+services:
+  app:
+    build:
+      context: .
+      target: final
+    image: krre/blog-api:1.0
