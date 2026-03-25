@@ -1,5 +1,6 @@
 use axum::Router;
 use serde::Deserialize;
+use tracing::info;
 
 #[derive(Deserialize, Debug)]
 pub struct Config {
@@ -30,7 +31,7 @@ impl Application {
                 .await?;
         let router = Router::new();
 
-        println!("listening on {}", listener.local_addr()?);
+        info!("listening on {}", listener.local_addr()?);
         axum::serve(listener, router.into_make_service()).await?;
         Ok(())
     }
