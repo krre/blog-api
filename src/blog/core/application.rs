@@ -4,8 +4,7 @@ use tracing::info;
 
 #[derive(Deserialize, Debug)]
 pub struct Config {
-    host: String,
-    port: u16,
+    server_addr: String,
 }
 
 pub struct Application {
@@ -26,9 +25,7 @@ impl Application {
     }
 
     pub async fn run(&self) -> Result<(), Box<dyn std::error::Error>> {
-        let listener =
-            tokio::net::TcpListener::bind(format!("{}:{}", self.config.host, self.config.port))
-                .await?;
+        let listener = tokio::net::TcpListener::bind(&self.config.server_addr).await?;
         let router = Router::new();
 
         info!("listening on {}", listener.local_addr()?);
