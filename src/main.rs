@@ -7,7 +7,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     tracing_subscriber::registry()
         .with(EnvFilter::from_default_env())
-        .with(tracing_subscriber::fmt::layer().without_time())
+        .with(
+            tracing_subscriber::fmt::layer()
+                .without_time()
+                .with_ansi(false),
+        )
         .init();
 
     Application::new().run().await?;
