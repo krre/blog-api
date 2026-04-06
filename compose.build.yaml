@@ -3,4 +3,4 @@ services:
     build:
       context: .
       target: final
-    image: krre/blog-api:1.0
+    image: krre/blog-api:latest
