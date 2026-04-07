@@ -3,7 +3,7 @@ use tracing_subscriber::{EnvFilter, prelude::*};
 
 fn init_tracing() {
     let filter_layer = EnvFilter::from_default_env();
-    let fmt_layer = tracing_subscriber::fmt::layer().without_time().json();
+    let fmt_layer = tracing_subscriber::fmt::layer().json();
 
     tracing_subscriber::registry()
         .with(filter_layer)
