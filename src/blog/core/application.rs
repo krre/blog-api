@@ -13,7 +13,7 @@ pub struct Application {
 
 impl Config {
     fn from_env() -> Self {
-        envy::from_env().expect("Failed to load config")
+        envy::from_env().expect("failed to load config")
     }
 }
 
