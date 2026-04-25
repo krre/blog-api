@@ -12,6 +12,10 @@ path = "src/blog/lib.rs"
 axum = "0.8.8"
 dotenvy = "0.15.7"
 envy = "0.4.2"
+sea-orm = { version = "=2.0.0-rc.38", features = [
+    "sqlx-postgres",
+    "runtime-tokio-rustls",
+] }
 serde = { version = "1.0.228", features = ["derive"] }
 tokio = { version = "1.51.0", features = ["full"] }
 tracing = "0.1.44"
