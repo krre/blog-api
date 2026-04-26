@@ -1,7 +1,8 @@
-use axum::Router;
 use serde::Deserialize;
 use sqlx::postgres::PgPoolOptions;
 use tracing::info;
+
+use crate::api::endpoint::Router;
 
 #[derive(Deserialize, Debug)]
 pub struct Config {
