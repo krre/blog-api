@@ -6,7 +6,7 @@ use tracing::info;
 #[derive(Deserialize, Debug)]
 pub struct Config {
     server_addr: String,
-    postgres_url: String,
+    database_url: String,
 }
 
 pub struct Application {
@@ -30,7 +30,7 @@ impl Application {
     pub async fn run(&self) -> Result<(), Box<dyn std::error::Error>> {
         let pool = PgPoolOptions::new()
             .max_connections(5)
-            .connect(&self.config.postgres_url)
+            .connect(&self.config.database_url)
             .await?;
 
         let listener = tokio::net::TcpListener::bind(&self.config.server_addr).await?;
