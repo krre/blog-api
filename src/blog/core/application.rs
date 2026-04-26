@@ -33,6 +33,8 @@ impl Application {
             .connect(&self.config.database_url)
             .await?;
 
+        sqlx::migrate!().run(&pool).await?;
+
         let listener = tokio::net::TcpListener::bind(&self.config.server_addr).await?;
         let router = Router::new();
 
