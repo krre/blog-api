@@ -9,7 +9,7 @@ WORKDIR /app
 
 RUN apk add --no-cache musl-dev
 
-RUN --mount=type=bind,source=src,target=migrations \
+RUN --mount=type=bind,source=migrations,target=migrations \
     --mount=type=bind,source=src,target=src \
     --mount=type=bind,source=Cargo.toml,target=Cargo.toml \
     --mount=type=bind,source=Cargo.lock,target=Cargo.lock \
