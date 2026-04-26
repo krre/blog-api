@@ -22,8 +22,6 @@ impl Config {
 impl Application {
     pub fn new() -> Self {
         let config = Config::from_env();
-        println!("{:?}", config);
-
         Self { config }
     }
 
