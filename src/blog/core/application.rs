@@ -1,6 +1,6 @@
 use axum::Router;
-use sea_orm::{Database, DatabaseConnection};
 use serde::Deserialize;
+use sqlx::postgres::PgPoolOptions;
 use tracing::info;
 
 #[derive(Deserialize, Debug)]
@@ -28,7 +28,10 @@ impl Application {
     }
 
     pub async fn run(&self) -> Result<(), Box<dyn std::error::Error>> {
-        let db: DatabaseConnection = Database::connect(&self.config.postgres_url).await?;
+        let pool = PgPoolOptions::new()
+            .max_connections(5)
+            .connect(&self.config.postgres_url)
+            .await?;
 
         let listener = tokio::net::TcpListener::bind(&self.config.server_addr).await?;
         let router = Router::new();
