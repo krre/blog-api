@@ -1,5 +1,4 @@
 use axum::{Json, extract::State};
-use axum_macros::debug_handler;
 use serde::Serialize;
 use sqlx::PgPool;
 
