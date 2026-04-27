@@ -1,3 +1,4 @@
+use crate::api::Result;
 use axum::{Json, extract::State};
 use serde::Serialize;
 use sqlx::PgPool;
@@ -21,11 +22,11 @@ struct User {
     pub name: String,
 }
 
-async fn get_one(State(pool): State<PgPool>) -> Json<User> {
+async fn get_one(State(pool): State<PgPool>) -> Result<Json<User>> {
     let user = sqlx::query_as!(User, "SELECT login, name FROM users WHERE id = 1")
         .fetch_one(&pool)
         .await
         .unwrap();
 
-    Json(user)
+    Ok(Json(user))
 }
