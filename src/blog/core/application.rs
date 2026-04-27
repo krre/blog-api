@@ -35,7 +35,7 @@ impl Application {
         sqlx::migrate!().run(&pool).await?;
 
         let listener = tokio::net::TcpListener::bind(&self.config.server_addr).await?;
-        let router = Router::new();
+        let router = Router::new(pool);
 
         info!("listening on http://{}", listener.local_addr()?);
         axum::serve(listener, router.into_make_service()).await?;
