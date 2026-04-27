@@ -2,7 +2,7 @@ name: Docker CI/CD
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "deploy" ]
     tags: [ "v*" ]
   workflow_dispatch:
 
