@@ -25,8 +25,7 @@ struct User {
 async fn get_one(State(pool): State<PgPool>) -> Result<Json<User>> {
     let user = sqlx::query_as!(User, "SELECT login, name FROM users WHERE id = 1")
         .fetch_one(&pool)
-        .await
-        .unwrap();
+        .await?;
 
     Ok(Json(user))
 }
