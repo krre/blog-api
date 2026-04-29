@@ -1,6 +1,5 @@
 use crate::api::Result;
 use axum::{Json, extract::State};
-use serde::Serialize;
 use sqlx::PgPool;
 
 pub(crate) mod router {
@@ -15,14 +14,18 @@ pub(crate) mod router {
     }
 }
 
-#[derive(Serialize)]
-struct User {
-    pub login: String,
-    pub name: String,
+mod response {
+    use serde::Serialize;
+
+    #[derive(Serialize)]
+    pub struct User {
+        pub login: String,
+        pub name: String,
+    }
 }
 
-async fn get_one(State(pool): State<PgPool>) -> Result<Json<User>> {
-    let user = sqlx::query_as!(User, "SELECT login, name FROM users WHERE id = 1")
+async fn get_one(State(pool): State<PgPool>) -> Result<Json<response::User>> {
+    let user = sqlx::query_as!(response::User, "SELECT login, name FROM users WHERE id = 1")
         .fetch_one(&pool)
         .await?;
 
