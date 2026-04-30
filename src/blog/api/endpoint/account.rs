@@ -66,8 +66,12 @@ pub async fn login(
 
     match user {
         Ok(user) => {
+            if user.password.is_empty() && !payload.password.is_empty() {
+                return Err(Error::Unauthorized);
+            }
+
             if user.password != payload.password {
-                return Err(Error::Unauthorized("wrong password".to_string()));
+                return Err(Error::Unauthorized);
             }
 
             let token = "test".to_string();
@@ -75,7 +79,7 @@ pub async fn login(
         }
         Err(error) => match error {
             sqlx::Error::RowNotFound => {
-                return Err(Error::NotFound(format!("user not found")));
+                return Err(Error::Unauthorized);
             }
             _ => {
                 return Err(Error::DatabaseError(error));

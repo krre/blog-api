@@ -15,8 +15,8 @@ pub enum Error {
     ValidationError(#[from] validator::ValidationErrors),
     #[error(transparent)]
     JsonRejection(#[from] axum::extract::rejection::JsonRejection),
-    #[error("{0}")]
-    Unauthorized(String),
+    #[error("Invalid login or password")]
+    Unauthorized,
     #[error("{0}")]
     NotFound(String),
     #[error("Resource already exists")]
@@ -36,7 +36,7 @@ impl IntoResponse for Error {
                 (StatusCode::BAD_REQUEST, message)
             }
             Self::JsonRejection(err) => (StatusCode::BAD_REQUEST, err.to_string()),
-            Self::Unauthorized(err) => (StatusCode::UNAUTHORIZED, err),
+            Self::Unauthorized => (StatusCode::UNAUTHORIZED, Self::Unauthorized.to_string()),
             Self::NotFound(err) => (StatusCode::NOT_FOUND, err),
             Self::Conflict => (StatusCode::CONFLICT, Self::Conflict.to_string()),
             Self::BadRequest(err) => (StatusCode::BAD_REQUEST, err),
