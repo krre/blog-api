@@ -1,6 +1,7 @@
-use crate::api::{Error, Result};
-use axum::{Json, extract::State};
+use crate::api::{Error, Result, endpoint::JwtExt, jwt};
+use axum::{Extension, Json, extract::State};
 use sqlx::PgPool;
+use std::sync::Arc;
 
 pub(crate) mod router {
     use super::*;
@@ -50,15 +51,17 @@ async fn get_one(State(pool): State<PgPool>) -> Result<Json<response::User>> {
 
 pub async fn login(
     State(pool): State<PgPool>,
+    jwt_ext: Extension<Arc<JwtExt>>,
     payload: axum::extract::Json<request::User>,
 ) -> Result<Json<response::Token>> {
     struct User {
+        id: i64,
         password: String,
     }
 
     let user = sqlx::query_as!(
         User,
-        "SELECT password FROM users WHERE login = $1",
+        "SELECT id, password FROM users WHERE login = $1",
         payload.login,
     )
     .fetch_one(&pool)
@@ -74,7 +77,9 @@ pub async fn login(
                 return Err(Error::Unauthorized);
             }
 
-            let token = "test".to_string();
+            let token = jwt::create_token(user.id as i64, &jwt_ext.secret)
+                .map_err(|e| Error::InternalServerError(format!("cannot create token: {}", e)))?;
+
             return Ok(Json(response::Token { token }));
         }
         Err(error) => match error {

@@ -1,17 +1,30 @@
 pub mod account;
 
-use axum::routing::{IntoMakeService, get};
+use axum::{
+    Extension,
+    routing::{IntoMakeService, get},
+};
 use sqlx::{Pool, Postgres};
+use std::sync::Arc;
 
 pub struct Router {
     axum_router: axum::Router,
 }
 
+pub struct JwtExt {
+    pub secret: String,
+}
+
 impl Router {
-    pub fn new(pool: Pool<Postgres>) -> Self {
+    pub fn new(pool: Pool<Postgres>, jwt_secret: &str) -> Self {
+        let jwt_ext = Arc::new(JwtExt {
+            secret: jwt_secret.to_owned(),
+        });
+
         let router = axum::Router::new()
             .nest("/account", account::router::new(&pool))
-            .route("/", get(handler));
+            .route("/", get(handler))
+            .layer(Extension(jwt_ext));
 
         Self {
             axum_router: router,

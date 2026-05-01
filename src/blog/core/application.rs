@@ -7,6 +7,7 @@ use tracing::info;
 pub struct Config {
     server_addr: String,
     database_url: String,
+    jwt_secret: String,
 }
 
 pub struct Application {
@@ -34,7 +35,7 @@ impl Application {
         sqlx::migrate!().run(&pool).await?;
 
         let listener = tokio::net::TcpListener::bind(&self.config.server_addr).await?;
-        let router = Router::new(pool);
+        let router = Router::new(pool, &self.config.jwt_secret);
 
         info!("listening on http://{}", listener.local_addr()?);
         axum::serve(listener, router.into_make_service()).await?;
