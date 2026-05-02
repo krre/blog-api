@@ -1,11 +1,13 @@
 pub mod account;
 
 use axum::{
-    Extension,
+    Extension, middleware,
     routing::{IntoMakeService, get},
 };
 use sqlx::{Pool, Postgres};
 use std::sync::Arc;
+
+use crate::api::middleware::console::log_request_response;
 
 pub struct Router {
     axum_router: axum::Router,
@@ -24,7 +26,8 @@ impl Router {
         let router = axum::Router::new()
             .nest("/account", account::router::new(&pool))
             .route("/", get(handler))
-            .layer(Extension(jwt_ext));
+            .layer(Extension(jwt_ext))
+            .layer(middleware::from_fn(log_request_response));
 
         Self {
             axum_router: router,

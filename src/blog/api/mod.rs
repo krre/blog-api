@@ -1,6 +1,7 @@
 pub mod endpoint;
 pub mod error;
 pub mod jwt;
+pub mod middleware;
 
 pub use error::Error;
 
