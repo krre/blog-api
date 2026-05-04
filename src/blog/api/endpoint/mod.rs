@@ -1,4 +1,5 @@
 pub mod account;
+pub mod auth;
 
 use axum::{
     Extension, middleware,
@@ -24,6 +25,7 @@ impl Router {
         });
 
         let router = axum::Router::new()
+            .nest("/auth", auth::router::new(&pool))
             .nest("/account", account::router::new(&pool))
             .route("/", get(handler))
             .layer(Extension(jwt_ext))
