@@ -1,10 +1,11 @@
 CREATE TABLE IF NOT EXISTS users (
     id bigserial PRIMARY KEY,
-    login text NOT NULL UNIQUE,
-    name text NOT NULL,
-    password text NOT NULL,
-    create_ts timestamptz NOT NULL DEFAULT now(),
-    update_ts timestamptz NOT NULL DEFAULT now()
+    username text NOT NULL UNIQUE,
+    first_name text NOT NULL,
+    last_name text NOT NULL DEFAULT '',
+    password_hash text NOT NULL DEFAULT '',
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now()
 );
 
-INSERT INTO users (login, name, password) VALUES('admin', 'Admin', '');
+INSERT INTO users (username, first_name) VALUES('admin', 'Admin');

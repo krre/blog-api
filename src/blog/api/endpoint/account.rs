@@ -19,15 +19,19 @@ mod response {
 
     #[derive(Serialize)]
     pub struct User {
-        pub login: String,
-        pub name: String,
+        pub username: String,
+        pub first_name: String,
+        pub last_name: String,
     }
 }
 
 async fn get_one(State(pool): State<PgPool>) -> Result<Json<response::User>> {
-    let user = sqlx::query_as!(response::User, "SELECT login, name FROM users WHERE id = 1")
-        .fetch_one(&pool)
-        .await?;
+    let user = sqlx::query_as!(
+        response::User,
+        "SELECT username, first_name, last_name FROM users WHERE id = 1"
+    )
+    .fetch_one(&pool)
+    .await?;
 
     Ok(Json(user))
 }

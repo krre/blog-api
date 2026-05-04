@@ -20,7 +20,7 @@ mod request {
 
     #[derive(Deserialize)]
     pub struct User {
-        pub login: String,
+        pub username: String,
         pub password: String,
     }
 }
@@ -41,24 +41,24 @@ pub async fn login(
 ) -> Result<Json<response::Token>> {
     struct User {
         id: i64,
-        password: String,
+        password_hash: String,
     }
 
     let user = sqlx::query_as!(
         User,
-        "SELECT id, password FROM users WHERE login = $1",
-        payload.login,
+        "SELECT id, password_hash FROM users WHERE username = $1",
+        payload.username,
     )
     .fetch_one(&pool)
     .await;
 
     match user {
         Ok(user) => {
-            if user.password.is_empty() && !payload.password.is_empty() {
+            if user.password_hash.is_empty() && !payload.password.is_empty() {
                 return Err(Error::Unauthorized);
             }
 
-            if user.password != payload.password {
+            if user.password_hash != payload.password {
                 return Err(Error::Unauthorized);
             }
 
