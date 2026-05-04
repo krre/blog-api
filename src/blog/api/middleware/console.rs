@@ -51,11 +51,27 @@ where
     if let Ok(body) = std::str::from_utf8(&bytes) {
         match direction {
             Direction::Request => tracing::info!(messsge_type = direction_descr, message = body),
-            Direction::Response(status) => tracing::info!(
-                messsge_type = direction_descr,
-                status = status.as_u16(),
-                message = body
-            ),
+            Direction::Response(status) => {
+                if status.is_server_error() {
+                    tracing::error!(
+                        messsge_type = direction_descr,
+                        status = status.as_u16(),
+                        message = body
+                    )
+                } else if status.is_client_error() {
+                    tracing::warn!(
+                        messsge_type = direction_descr,
+                        status = status.as_u16(),
+                        message = body
+                    )
+                } else {
+                    tracing::info!(
+                        messsge_type = direction_descr,
+                        status = status.as_u16(),
+                        message = body
+                    )
+                }
+            }
         }
     };
 
