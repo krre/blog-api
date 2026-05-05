@@ -1,10 +1,7 @@
 pub mod account;
 pub mod auth;
 
-use axum::{
-    Extension, middleware,
-    routing::{IntoMakeService, get},
-};
+use axum::{Extension, middleware, routing::IntoMakeService};
 use sqlx::{Pool, Postgres};
 use std::sync::Arc;
 
@@ -27,7 +24,6 @@ impl Router {
         let router = axum::Router::new()
             .nest("/auth", auth::router::new(&pool))
             .nest("/account", account::router::new(&pool))
-            .route("/", get(handler))
             .layer(Extension(jwt_ext))
             .layer(middleware::from_fn(log_request_response));
 
@@ -39,8 +35,4 @@ impl Router {
     pub fn into_make_service(self) -> IntoMakeService<axum::Router> {
         self.axum_router.into_make_service()
     }
-}
-
-async fn handler() -> &'static str {
-    "Under construction"
 }
