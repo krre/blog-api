@@ -1,5 +1,5 @@
-pub mod account;
 pub mod auth;
+pub mod users;
 
 use axum::{Extension, middleware, routing::IntoMakeService};
 use sqlx::{Pool, Postgres};
@@ -23,7 +23,7 @@ impl Router {
 
         let router = axum::Router::new()
             .nest("/auth", auth::router::new(&pool))
-            .nest("/account", account::router::new(&pool))
+            .nest("/users", users::router::new(&pool))
             .layer(Extension(jwt_ext))
             .layer(middleware::from_fn(log_request_response));
 
