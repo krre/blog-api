@@ -11,6 +11,8 @@ enum Direction {
     Response(StatusCode),
 }
 
+const SENSITIVE_MASK: &str = "***";
+
 pub async fn log_request_response(
     req: Request<axum::body::Body>,
     next: Next,
@@ -64,15 +66,27 @@ where
 }
 
 fn log_request(message_type: &str, path: &str, message: &str) {
-    tracing::info!(message_type, path, message)
+    if path.starts_with("/auth/login") {
+        let mut value: serde_json::Value = serde_json::from_slice(message.as_bytes()).unwrap();
+        value["password"] = SENSITIVE_MASK.into();
+        tracing::info!(message_type, path, message = %value);
+    } else {
+        tracing::info!(message_type, path, message);
+    }
 }
 
 fn log_response(message_type: &str, path: &str, status: StatusCode, message: &str) {
     if status.is_server_error() {
-        tracing::error!(message_type, path, status = status.as_u16(), message)
+        tracing::error!(message_type, path, status = status.as_u16(), message);
     } else if status.is_client_error() {
-        tracing::warn!(message_type, path, status = status.as_u16(), message)
+        tracing::warn!(message_type, path, status = status.as_u16(), message);
     } else {
-        tracing::info!(message_type, path, status = status.as_u16(), message)
+        if path.starts_with("/auth/login") {
+            let mut value: serde_json::Value = serde_json::from_slice(message.as_bytes()).unwrap();
+            value["token"] = SENSITIVE_MASK.into();
+            tracing::info!(message_type, path, status = status.as_u16(), %value);
+        } else {
+            tracing::info!(message_type, path, status = status.as_u16(), message);
+        }
     }
 }
