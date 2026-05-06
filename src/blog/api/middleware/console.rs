@@ -67,9 +67,7 @@ where
 
 fn log_request(message_type: &str, path: &str, message: &str) {
     if path.starts_with("/auth/login") {
-        let mut value: serde_json::Value = serde_json::from_slice(message.as_bytes()).unwrap();
-        value["password"] = SENSITIVE_MASK.into();
-        tracing::info!(message_type, path, message = %value);
+        log_mask_value(message_type, path, None, message, "password");
     } else {
         tracing::info!(message_type, path, message);
     }
@@ -82,11 +80,33 @@ fn log_response(message_type: &str, path: &str, status: StatusCode, message: &st
         tracing::warn!(message_type, path, status = status.as_u16(), message);
     } else {
         if path.starts_with("/auth/login") {
-            let mut value: serde_json::Value = serde_json::from_slice(message.as_bytes()).unwrap();
-            value["token"] = SENSITIVE_MASK.into();
-            tracing::info!(message_type, path, status = status.as_u16(), %value);
+            log_mask_value(message_type, path, Some(status), message, "token");
         } else {
             tracing::info!(message_type, path, status = status.as_u16(), message);
+        }
+    }
+}
+
+fn log_mask_value(
+    message_type: &str,
+    path: &str,
+    status: Option<StatusCode>,
+    message: &str,
+    field: &str,
+) {
+    if let Ok(mut value) = serde_json::from_slice::<serde_json::Value>(message.as_bytes()) {
+        if let Some(obj) = value.as_object_mut() {
+            if let Some(field_value) = obj.get_mut(field) {
+                if field_value.is_string() {
+                    *field_value = SENSITIVE_MASK.into();
+
+                    if let Some(status) = status {
+                        tracing::info!(message_type, path, status = status.as_u16(), message = %value);
+                    } else {
+                        tracing::info!(message_type, path, message = %value);
+                    }
+                }
+            }
         }
     }
 }
