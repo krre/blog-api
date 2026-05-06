@@ -16,19 +16,24 @@ pub async fn log_request_response(
     next: Next,
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
     let (parts, body) = req.into_parts();
-    let bytes = buffer_and_print(Direction::Request, body).await?;
+    let path = parts.uri.path().to_string();
+    let bytes = buffer_and_print(Direction::Request, &path, body).await?;
     let req = Request::from_parts(parts, Body::from(bytes));
 
     let res = next.run(req).await;
 
     let (parts, body) = res.into_parts();
-    let bytes = buffer_and_print(Direction::Response(parts.status), body).await?;
+    let bytes = buffer_and_print(Direction::Response(parts.status), &path, body).await?;
     let res = Response::from_parts(parts, Body::from(bytes));
 
     Ok(res)
 }
 
-async fn buffer_and_print<B>(direction: Direction, body: B) -> Result<Bytes, (StatusCode, String)>
+async fn buffer_and_print<B>(
+    direction: Direction,
+    path: &str,
+    body: B,
+) -> Result<Bytes, (StatusCode, String)>
 where
     B: axum::body::HttpBody<Data = Bytes>,
     B::Error: std::fmt::Display,
@@ -50,30 +55,27 @@ where
 
     if let Ok(body) = std::str::from_utf8(&bytes) {
         match direction {
-            Direction::Request => tracing::info!(messsge_type = direction_descr, message = body),
-            Direction::Response(status) => {
-                if status.is_server_error() {
-                    tracing::error!(
-                        messsge_type = direction_descr,
-                        status = status.as_u16(),
-                        message = body
-                    )
-                } else if status.is_client_error() {
-                    tracing::warn!(
-                        messsge_type = direction_descr,
-                        status = status.as_u16(),
-                        message = body
-                    )
-                } else {
-                    tracing::info!(
-                        messsge_type = direction_descr,
-                        status = status.as_u16(),
-                        message = body
-                    )
-                }
-            }
+            Direction::Request => log_request(path, body),
+            Direction::Response(status) => log_response(path, status, body),
         }
     };
 
     Ok(bytes)
+}
+
+fn log_request(path: &str, message: &str) {
+    let message_type = "request";
+    tracing::info!(message_type, path, message)
+}
+
+fn log_response(path: &str, status: StatusCode, message: &str) {
+    let message_type = "response";
+
+    if status.is_server_error() {
+        tracing::error!(message_type, path, status = status.as_u16(), message)
+    } else if status.is_client_error() {
+        tracing::warn!(message_type, path, status = status.as_u16(), message)
+    } else {
+        tracing::info!(message_type, path, status = status.as_u16(), message)
+    }
 }
