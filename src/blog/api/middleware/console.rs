@@ -38,7 +38,7 @@ where
     B: axum::body::HttpBody<Data = Bytes>,
     B::Error: std::fmt::Display,
 {
-    let direction_descr = match direction {
+    let message_type = match direction {
         Direction::Request => "request",
         Direction::Response(_) => "response",
     };
@@ -48,29 +48,26 @@ where
         Err(err) => {
             return Err((
                 StatusCode::BAD_REQUEST,
-                format!("failed to read {direction_descr} body: {err}"),
+                format!("failed to read {message_type} body: {err}"),
             ));
         }
     };
 
     if let Ok(body) = std::str::from_utf8(&bytes) {
         match direction {
-            Direction::Request => log_request(path, body),
-            Direction::Response(status) => log_response(path, status, body),
+            Direction::Request => log_request(message_type, path, body),
+            Direction::Response(status) => log_response(message_type, path, status, body),
         }
     };
 
     Ok(bytes)
 }
 
-fn log_request(path: &str, message: &str) {
-    let message_type = "request";
+fn log_request(message_type: &str, path: &str, message: &str) {
     tracing::info!(message_type, path, message)
 }
 
-fn log_response(path: &str, status: StatusCode, message: &str) {
-    let message_type = "response";
-
+fn log_response(message_type: &str, path: &str, status: StatusCode, message: &str) {
     if status.is_server_error() {
         tracing::error!(message_type, path, status = status.as_u16(), message)
     } else if status.is_client_error() {
