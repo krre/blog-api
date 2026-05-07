@@ -18,14 +18,21 @@ pub async fn log_request_response(
     next: Next,
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
     let (parts, body) = req.into_parts();
+    let client_ip = parts
+        .headers
+        .get("x-forwarded-for")
+        .and_then(|v| v.to_str().ok())
+        .map(|s| s.to_string())
+        .unwrap_or_else(|| "Unknown".to_string());
     let path = parts.uri.path().to_string();
-    let bytes = buffer_and_print(Direction::Request, &path, body).await?;
+    let bytes = buffer_and_print(Direction::Request, &client_ip, &path, body).await?;
     let req = Request::from_parts(parts, Body::from(bytes));
 
     let res = next.run(req).await;
 
     let (parts, body) = res.into_parts();
-    let bytes = buffer_and_print(Direction::Response(parts.status), &path, body).await?;
+    let bytes =
+        buffer_and_print(Direction::Response(parts.status), &client_ip, &path, body).await?;
     let res = Response::from_parts(parts, Body::from(bytes));
 
     Ok(res)
@@ -33,6 +40,7 @@ pub async fn log_request_response(
 
 async fn buffer_and_print<B>(
     direction: Direction,
+    client_ip: &str,
     path: &str,
     body: B,
 ) -> Result<Bytes, (StatusCode, String)>
@@ -57,38 +65,72 @@ where
 
     if let Ok(body) = std::str::from_utf8(&bytes) {
         match direction {
-            Direction::Request => log_request(message_type, path, body),
-            Direction::Response(status) => log_response(message_type, path, status, body),
+            Direction::Request => log_request(message_type, client_ip, path, body),
+            Direction::Response(status) => {
+                log_response(message_type, client_ip, path, status, body)
+            }
         }
     };
 
     Ok(bytes)
 }
 
-fn log_request(message_type: &str, path: &str, message: &str) {
+fn log_request(message_type: &str, client_ip: &str, path: &str, message: &str) {
     if path.starts_with("/auth/login") {
-        log_mask_value(message_type, path, None, message, "password");
+        log_mask_value(message_type, client_ip, path, None, message, "password");
     } else {
-        tracing::info!(message_type, path, message);
+        tracing::info!(message_type, client_ip, path, message);
     }
 }
 
-fn log_response(message_type: &str, path: &str, status: StatusCode, message: &str) {
+fn log_response(
+    message_type: &str,
+    client_ip: &str,
+    path: &str,
+    status: StatusCode,
+    message: &str,
+) {
     if status.is_server_error() {
-        tracing::error!(message_type, path, status = status.as_u16(), message);
+        tracing::error!(
+            message_type,
+            client_ip,
+            path,
+            status = status.as_u16(),
+            message
+        );
     } else if status.is_client_error() {
-        tracing::warn!(message_type, path, status = status.as_u16(), message);
+        tracing::warn!(
+            message_type,
+            client_ip,
+            path,
+            status = status.as_u16(),
+            message
+        );
     } else {
         if path.starts_with("/auth/login") {
-            log_mask_value(message_type, path, Some(status), message, "token");
+            log_mask_value(
+                message_type,
+                client_ip,
+                path,
+                Some(status),
+                message,
+                "token",
+            );
         } else {
-            tracing::info!(message_type, path, status = status.as_u16(), message);
+            tracing::info!(
+                message_type,
+                client_ip,
+                path,
+                status = status.as_u16(),
+                message
+            );
         }
     }
 }
 
 fn log_mask_value(
     message_type: &str,
+    client_ip: &str,
     path: &str,
     status: Option<StatusCode>,
     message: &str,
@@ -101,9 +143,9 @@ fn log_mask_value(
                     *field_value = SENSITIVE_MASK.into();
 
                     if let Some(status) = status {
-                        tracing::info!(message_type, path, status = status.as_u16(), message = %value);
+                        tracing::info!(message_type, client_ip, path, status = status.as_u16(), message = %value);
                     } else {
-                        tracing::info!(message_type, path, message = %value);
+                        tracing::info!(message_type, client_ip, path, message = %value);
                     }
                 }
             }
