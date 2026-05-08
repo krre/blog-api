@@ -1,5 +1,4 @@
 use axum::{
-    Json,
     http::StatusCode,
     response::{IntoResponse, Response},
 };
@@ -43,8 +42,6 @@ impl IntoResponse for Error {
             Self::InternalServerError(err) => (StatusCode::INTERNAL_SERVER_ERROR, err),
         };
 
-        let body = Json(message);
-
-        (status, body).into_response()
+        (status, message).into_response()
     }
 }
