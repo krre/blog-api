@@ -32,7 +32,7 @@ impl IntoResponse for Error {
             Self::DatabaseError(err) => (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()),
             Self::ValidationError(_) => {
                 let message = format!("Input validation error: [{self}]").replace('\n', ", ");
-                (StatusCode::BAD_REQUEST, message)
+                (StatusCode::UNPROCESSABLE_ENTITY, message)
             }
             Self::JsonRejection(err) => (StatusCode::BAD_REQUEST, err.to_string()),
             Self::Unauthorized => (StatusCode::UNAUTHORIZED, Self::Unauthorized.to_string()),
