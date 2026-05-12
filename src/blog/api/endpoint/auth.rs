@@ -41,12 +41,14 @@ pub async fn login(
 ) -> Result<Json<response::Token>> {
     struct User {
         id: i64,
+        first_name: String,
+        last_name: String,
         password_hash: String,
     }
 
     let user = sqlx::query_as!(
         User,
-        "SELECT id, password_hash FROM users WHERE username = $1",
+        "SELECT id, first_name, last_name, password_hash FROM users WHERE username = $1",
         payload.username,
     )
     .fetch_one(&pool)
@@ -62,7 +64,12 @@ pub async fn login(
                 return Err(Error::Unauthorized);
             }
 
-            let token = jwt::create_token(user.id as i64, &jwt_ext.secret)
+            let jwt_user = jwt::User {
+                id: user.id,
+                first_name: user.first_name,
+                last_name: user.last_name,
+            };
+            let token = jwt::create_token(jwt_user, &jwt_ext.secret)
                 .map_err(|e| Error::InternalServerError(format!("cannot create token: {}", e)))?;
 
             return Ok(Json(response::Token { token }));

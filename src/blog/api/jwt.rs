@@ -8,27 +8,30 @@ use std::{
 use thiserror::Error;
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct User {
+    pub id: i64,
+    pub first_name: String,
+    pub last_name: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 struct Claims {
-    sub: String,
-    user_id: i64,
+    user: User,
     exp: usize,
-    company: String,
 }
 
 #[derive(Error, Debug)]
 #[error("jsonwebtoken error: {0}")]
 pub struct Error(#[from] jsonwebtoken::errors::Error);
 
-pub fn create_token(user_id: i64, secret: &str) -> Result<String, Error> {
+pub fn create_token(user: User, secret: &str) -> Result<String, Error> {
     let from_now = Duration::from_hours(24 * 365 * 10); // 10 years
     let expired_future_time = SystemTime::now().add(from_now);
     let exp = OffsetDateTime::from(expired_future_time);
 
     let claims = Claims {
-        sub: "todo".to_string(),
         exp: exp.unix_timestamp() as usize,
-        user_id,
-        company: "M31".to_string(),
+        user,
     };
 
     let token = encode(
@@ -47,5 +50,5 @@ pub fn user_id(token: &str, secret: &str) -> Result<i64, Error> {
         &Validation::new(Algorithm::HS256),
     )?;
 
-    Ok(data.claims.user_id)
+    Ok(data.claims.user.id)
 }
