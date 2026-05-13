@@ -1,5 +1,8 @@
 use crate::api::Result;
-use axum::{Json, extract::State};
+use axum::{
+    Json,
+    extract::{Path, State},
+};
 use sqlx::PgPool;
 
 pub(crate) mod router {
@@ -9,7 +12,7 @@ pub(crate) mod router {
 
     pub fn new(pool: &Pool<Postgres>) -> routing::Router {
         routing::Router::new()
-            .route("/", routing::get(get_one))
+            .route("/{id}", routing::get(get_one))
             .with_state(pool.clone())
     }
 }
@@ -25,10 +28,11 @@ mod response {
     }
 }
 
-async fn get_one(State(pool): State<PgPool>) -> Result<Json<response::User>> {
+async fn get_one(Path(id): Path<i64>, State(pool): State<PgPool>) -> Result<Json<response::User>> {
     let user = sqlx::query_as!(
         response::User,
-        "SELECT username, first_name, last_name FROM users WHERE id = 1"
+        "SELECT username, first_name, last_name FROM users WHERE id = $1",
+        id
     )
     .fetch_one(&pool)
     .await?;
