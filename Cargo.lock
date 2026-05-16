@@ -177,6 +177,7 @@ dependencies = [
  "axum-macros",
  "dotenvy",
  "envy",
+ "headers",
  "http-body-util",
  "jsonwebtoken",
  "serde",
