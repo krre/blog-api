@@ -10,7 +10,18 @@ pub(crate) mod router {
     pub fn new(pool: &Pool<Postgres>) -> routing::Router {
         routing::Router::new()
             .route("/", routing::get(get))
+            .route("/", routing::post(update))
             .with_state(pool.clone())
+    }
+}
+
+mod request {
+    use serde::Deserialize;
+
+    #[derive(Deserialize)]
+    pub struct Profile {
+        pub first_name: String,
+        pub last_name: String,
     }
 }
 
@@ -38,4 +49,21 @@ async fn get(
     .await?;
 
     Ok(Json(user))
+}
+
+pub async fn update(
+    State(pool): State<PgPool>,
+    AuthUser(user_id): AuthUser,
+    payload: axum::extract::Json<request::Profile>,
+) -> Result<()> {
+    sqlx::query!(
+        "UPDATE users SET first_name = $1, last_name = $2, updated_at = current_timestamp WHERE id = $3",
+        payload.first_name,
+        payload.last_name,
+        user_id
+    )
+    .execute(&pool)
+    .await?;
+
+    Ok(())
 }
