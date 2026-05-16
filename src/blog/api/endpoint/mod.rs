@@ -1,4 +1,5 @@
 pub mod auth;
+pub mod profile;
 pub mod users;
 
 use axum::{Extension, middleware, routing::IntoMakeService};
@@ -23,6 +24,7 @@ impl Router {
 
         let router = axum::Router::new()
             .nest("/auth", auth::router::new(&pool))
+            .nest("/profile", profile::router::new(&pool))
             .nest("/users", users::router::new(&pool))
             .layer(Extension(jwt_ext))
             .layer(middleware::from_fn(log_request_response));
