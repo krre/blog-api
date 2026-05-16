@@ -1,5 +1,6 @@
 pub mod endpoint;
 pub mod error;
+pub mod extract;
 pub mod jwt;
 pub mod middleware;
 
