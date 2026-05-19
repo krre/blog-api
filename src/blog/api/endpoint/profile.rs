@@ -1,8 +1,4 @@
-use crate::api::{Error, Result, extract::AuthUser};
-use argon2::{
-    Argon2,
-    password_hash::{PasswordHasher, SaltString, rand_core::OsRng},
-};
+use crate::api::{Result, argon2_hash, extract::AuthUser};
 use axum::{Json, extract::State};
 use sqlx::PgPool;
 
@@ -83,13 +79,7 @@ pub async fn update_password(
     AuthUser(user_id): AuthUser,
     payload: axum::extract::Json<request::Password>,
 ) -> Result<()> {
-    let salt = SaltString::generate(&mut OsRng);
-    let argon2 = Argon2::default();
-
-    let password_hash = argon2
-        .hash_password(payload.password.as_bytes(), &salt)
-        .map_err(|e| Error::InternalServerError(format!("cannot hash password: {}", e)))?
-        .to_string();
+    let password_hash = argon2_hash::encode(&payload.password)?;
 
     sqlx::query!(
         "UPDATE users SET password_hash = $1, updated_at = current_timestamp WHERE id = $2",

@@ -1,4 +1,4 @@
-use crate::api::{Error, Result, endpoint::JwtExt, jwt};
+use crate::api::{Error, Result, argon2_hash, endpoint::JwtExt, jwt};
 use axum::{Extension, Json, extract::State};
 use sqlx::PgPool;
 use std::sync::Arc;
@@ -60,7 +60,9 @@ pub async fn login(
                 return Err(Error::Unauthorized);
             }
 
-            if user.password_hash != payload.password {
+            if !user.password_hash.is_empty()
+                && !argon2_hash::verify(&payload.password, &user.password_hash)?
+            {
                 return Err(Error::Unauthorized);
             }
 

@@ -1,3 +1,4 @@
+pub mod argon2_hash;
 pub mod endpoint;
 pub mod error;
 pub mod extract;
