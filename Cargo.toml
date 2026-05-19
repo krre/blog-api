@@ -9,6 +9,7 @@ name = "blog"
 path = "src/blog/lib.rs"
 
 [dependencies]
+argon2 = "0.5.3"
 axum = { version = "0.8.9", features = ["json"] }
 axum-extra = { version = "0.12.6", features = ["typed-header"] }
 axum-macros = "0.5.1"
