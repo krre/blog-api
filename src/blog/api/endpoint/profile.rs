@@ -1,6 +1,7 @@
-use crate::api::{Result, argon2_hash, extract::AuthUser};
-use axum::{Json, extract::State};
+use crate::api::{Error, Result, argon2_hash, endpoint::JwtExt, extract::AuthUser, jwt};
+use axum::{Extension, Json, extract::State};
 use sqlx::PgPool;
+use std::sync::Arc;
 
 pub(crate) mod router {
     use super::*;
@@ -40,6 +41,11 @@ mod response {
         pub first_name: String,
         pub last_name: String,
     }
+
+    #[derive(Serialize)]
+    pub struct Token {
+        pub token: String,
+    }
 }
 
 async fn get(
@@ -60,8 +66,9 @@ async fn get(
 pub async fn update(
     State(pool): State<PgPool>,
     AuthUser(user_id): AuthUser,
+    jwt_ext: Extension<Arc<JwtExt>>,
     payload: axum::extract::Json<request::Profile>,
-) -> Result<()> {
+) -> Result<Json<response::Token>> {
     sqlx::query!(
         "UPDATE users SET first_name = $1, last_name = $2, updated_at = current_timestamp WHERE id = $3",
         payload.first_name,
@@ -71,7 +78,16 @@ pub async fn update(
     .execute(&pool)
     .await?;
 
-    Ok(())
+    let jwt_user = jwt::User {
+        id: user_id,
+        first_name: payload.first_name.clone(),
+        last_name: payload.last_name.clone(),
+    };
+
+    let token = jwt::create_token(jwt_user, &jwt_ext.secret)
+        .map_err(|e| Error::InternalServerError(format!("cannot create token: {}", e)))?;
+
+    Ok(Json(response::Token { token }))
 }
 
 pub async fn update_password(
