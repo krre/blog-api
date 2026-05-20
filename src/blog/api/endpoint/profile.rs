@@ -24,6 +24,9 @@ mod request {
     pub struct Profile {
         pub first_name: String,
         pub last_name: String,
+        pub email: String,
+        pub location: String,
+        pub bio: String,
     }
 
     #[derive(Deserialize)]
@@ -40,6 +43,9 @@ mod response {
         pub username: String,
         pub first_name: String,
         pub last_name: String,
+        pub email: String,
+        pub location: String,
+        pub bio: String,
     }
 
     #[derive(Serialize)]
@@ -54,7 +60,9 @@ async fn get(
 ) -> Result<Json<response::Profile>> {
     let user = sqlx::query_as!(
         response::Profile,
-        "SELECT username, first_name, last_name FROM users WHERE id = $1",
+        "SELECT username, first_name, last_name, email, location, bio
+        FROM users
+        WHERE id = $1",
         user_id
     )
     .fetch_one(&pool)
@@ -70,9 +78,13 @@ pub async fn update(
     payload: axum::extract::Json<request::Profile>,
 ) -> Result<Json<response::Token>> {
     sqlx::query!(
-        "UPDATE users SET first_name = $1, last_name = $2, updated_at = current_timestamp WHERE id = $3",
+        "UPDATE users
+        SET first_name = $1, last_name = $2, email = $3, location = $4, bio = $5, updated_at = current_timestamp WHERE id = $6",
         payload.first_name,
         payload.last_name,
+        payload.email,
+        payload.location,
+        payload.bio,
         user_id
     )
     .execute(&pool)
