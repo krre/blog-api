@@ -4,6 +4,9 @@ CREATE TABLE IF NOT EXISTS users (
     first_name text NOT NULL,
     last_name text NOT NULL DEFAULT '',
     password_hash text NOT NULL DEFAULT '',
+    email text NOT NULL UNIQUE DEFAULT '',
+    location text NOT NULL DEFAULT '',
+    bio text NOT NULL DEFAULT '',
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now()
 );
