@@ -93,8 +93,9 @@ pub async fn update(
 pub async fn update_password(
     State(pool): State<PgPool>,
     AuthUser(user_id): AuthUser,
+    jwt_ext: Extension<Arc<JwtExt>>,
     payload: axum::extract::Json<request::Password>,
-) -> Result<()> {
+) -> Result<Json<response::Token>> {
     let password_hash = argon2_hash::encode(&payload.password)?;
 
     sqlx::query!(
@@ -105,5 +106,16 @@ pub async fn update_password(
     .execute(&pool)
     .await?;
 
-    Ok(())
+    let jwt_user = sqlx::query_as!(
+        jwt::User,
+        "SELECT id, first_name, last_name FROM users WHERE id = $1",
+        user_id
+    )
+    .fetch_one(&pool)
+    .await?;
+
+    let token = jwt::create_token(jwt_user, &jwt_ext.secret)
+        .map_err(|e| Error::InternalServerError(format!("cannot create token: {}", e)))?;
+
+    Ok(Json(response::Token { token }))
 }
