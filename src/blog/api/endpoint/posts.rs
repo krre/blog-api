@@ -10,6 +10,7 @@ pub(crate) mod router {
     pub fn new(pool: &Pool<Postgres>) -> routing::Router {
         routing::Router::new()
             .route("/", routing::post(create))
+            .route("/", routing::get(get_all))
             .with_state(pool.clone())
     }
 }
@@ -27,10 +28,21 @@ mod request {
 
 mod response {
     use serde::Serialize;
+    use time::OffsetDateTime;
 
     #[derive(Serialize)]
     pub struct PostId {
         pub id: i64,
+    }
+
+    #[derive(Serialize)]
+    pub struct Post {
+        pub id: i64,
+        pub title: String,
+        pub post: String,
+        pub is_published: bool,
+        pub created_at: OffsetDateTime,
+        pub updated_at: OffsetDateTime,
     }
 }
 
@@ -53,4 +65,17 @@ pub async fn create(
     .await?;
 
     Ok(Json(post))
+}
+
+pub async fn get_all(State(pool): State<PgPool>) -> Result<Json<Vec<response::Post>>> {
+    let posts = sqlx::query_as!(
+        response::Post,
+        "SELECT id, title, post, is_published, created_at, updated_at
+        FROM posts
+        ORDER BY updated_at DESC",
+    )
+    .fetch_all(&pool)
+    .await?;
+
+    Ok(Json(posts))
 }
