@@ -10,7 +10,7 @@ pub(crate) mod router {
 
     pub fn new(pool: &Pool<Postgres>) -> routing::Router {
         routing::Router::new()
-            .route("/", routing::get(get))
+            .route("/", routing::get(get_one))
             .route("/", routing::post(update))
             .route("/password", routing::patch(update_password))
             .with_state(pool.clone())
@@ -54,7 +54,7 @@ mod response {
     }
 }
 
-async fn get(
+async fn get_one(
     State(pool): State<PgPool>,
     AuthUser(user_id): AuthUser,
 ) -> Result<Json<response::Profile>> {
