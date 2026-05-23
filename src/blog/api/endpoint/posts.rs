@@ -41,7 +41,9 @@ mod response {
         pub title: String,
         pub post: String,
         pub is_published: bool,
+        #[serde(with = "time::serde::rfc3339")]
         pub created_at: OffsetDateTime,
+        #[serde(with = "time::serde::rfc3339")]
         pub updated_at: OffsetDateTime,
     }
 }
