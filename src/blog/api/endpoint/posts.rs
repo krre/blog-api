@@ -1,5 +1,8 @@
 use crate::api::{Result, extract::AuthUser};
-use axum::{Json, extract::State};
+use axum::{
+    Json,
+    extract::{Path, State},
+};
 use sqlx::PgPool;
 
 pub(crate) mod router {
@@ -11,6 +14,7 @@ pub(crate) mod router {
         routing::Router::new()
             .route("/", routing::post(create))
             .route("/", routing::get(get_all))
+            .route("/{id}", routing::get(get_one))
             .with_state(pool.clone())
     }
 }
@@ -80,4 +84,21 @@ pub async fn get_all(State(pool): State<PgPool>) -> Result<Json<Vec<response::Po
     .await?;
 
     Ok(Json(posts))
+}
+
+pub async fn get_one(
+    Path(id): Path<i64>,
+    State(pool): State<PgPool>,
+) -> Result<Json<response::Post>> {
+    let post = sqlx::query_as!(
+        response::Post,
+        "SELECT id, title, post, is_published, created_at, updated_at
+        FROM posts
+        WHERE id = $1",
+        id,
+    )
+    .fetch_one(&pool)
+    .await?;
+
+    Ok(Json(post))
 }
