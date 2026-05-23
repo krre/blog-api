@@ -1,4 +1,5 @@
 pub mod auth;
+pub mod posts;
 pub mod profile;
 pub mod users;
 
@@ -26,6 +27,7 @@ impl Router {
             .nest("/auth", auth::router::new(&pool))
             .nest("/profile", profile::router::new(&pool))
             .nest("/users", users::router::new(&pool))
+            .nest("/posts", posts::router::new(&pool))
             .layer(Extension(jwt_ext))
             .layer(middleware::from_fn(log_request_response));
 
