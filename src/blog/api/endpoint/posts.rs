@@ -15,6 +15,7 @@ pub(crate) mod router {
             .route("/", routing::post(create))
             .route("/", routing::get(get_all))
             .route("/{id}", routing::get(get_one))
+            .route("/{id}", routing::delete(delete))
             .with_state(pool.clone())
     }
 }
@@ -101,4 +102,12 @@ pub async fn get_one(
     .await?;
 
     Ok(Json(post))
+}
+
+pub async fn delete(Path(id): Path<i64>, State(pool): State<PgPool>) -> Result<()> {
+    sqlx::query!("DELETE FROM posts WHERE id = $1", id)
+        .execute(&pool)
+        .await?;
+
+    Ok(())
 }
