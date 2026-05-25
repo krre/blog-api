@@ -15,6 +15,7 @@ pub(crate) mod router {
             .route("/", routing::post(create))
             .route("/", routing::get(get_all))
             .route("/{id}", routing::get(get_one))
+            .route("/{id}", routing::put(update))
             .route("/{id}", routing::delete(delete))
             .with_state(pool.clone())
     }
@@ -108,6 +109,24 @@ pub async fn delete(Path(id): Path<i64>, State(pool): State<PgPool>) -> Result<(
     sqlx::query!("DELETE FROM posts WHERE id = $1", id)
         .execute(&pool)
         .await?;
+
+    Ok(())
+}
+
+pub async fn update(
+    Path(id): Path<i64>,
+    State(pool): State<PgPool>,
+    payload: axum::extract::Json<request::Post>,
+) -> Result<()> {
+    sqlx::query!(
+        "UPDATE posts SET title = $1, post = $2, is_published = $3, updated_at = current_timestamp WHERE id = $4",
+        payload.title,
+        payload.post,
+        payload.is_published,
+        id,
+    )
+    .execute(&pool)
+    .await?;
 
     Ok(())
 }
