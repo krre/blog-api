@@ -42,3 +42,9 @@ impl Application {
         Ok(())
     }
 }
+
+impl Default for Application {
+    fn default() -> Self {
+        Self::new()
+    }
+}

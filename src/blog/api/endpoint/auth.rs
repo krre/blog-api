@@ -74,15 +74,11 @@ pub async fn login(
             let token = jwt::create_token(jwt_user, &jwt_ext.secret)
                 .map_err(|e| Error::InternalServerError(format!("cannot create token: {}", e)))?;
 
-            return Ok(Json(response::Token { token }));
+            Ok(Json(response::Token { token }))
         }
         Err(error) => match error {
-            sqlx::Error::RowNotFound => {
-                return Err(Error::Unauthorized);
-            }
-            _ => {
-                return Err(Error::DatabaseError(error));
-            }
+            sqlx::Error::RowNotFound => Err(Error::Unauthorized),
+            _ => Err(Error::DatabaseError(error)),
         },
     }
 }

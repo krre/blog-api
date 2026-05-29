@@ -156,19 +156,17 @@ fn log_mask_value(
     message: &str,
     field: &str,
 ) {
-    if let Ok(mut value) = serde_json::from_slice::<serde_json::Value>(message.as_bytes()) {
-        if let Some(obj) = value.as_object_mut() {
-            if let Some(field_value) = obj.get_mut(field) {
-                if field_value.is_string() {
-                    *field_value = SENSITIVE_MASK.into();
+    if let Ok(mut value) = serde_json::from_slice::<serde_json::Value>(message.as_bytes())
+        && let Some(obj) = value.as_object_mut()
+        && let Some(field_value) = obj.get_mut(field)
+        && field_value.is_string()
+    {
+        *field_value = SENSITIVE_MASK.into();
 
-                    if let Some(status) = status {
-                        tracing::info!(message_type, client_ip, path, status = status.as_u16(), message = %value);
-                    } else if let Some(method) = method {
-                        tracing::info!(message_type, method, client_ip, path, message = %value);
-                    }
-                }
-            }
+        if let Some(status) = status {
+            tracing::info!(message_type, client_ip, path, status = status.as_u16(), message = %value);
+        } else if let Some(method) = method {
+            tracing::info!(message_type, method, client_ip, path, message = %value);
         }
     }
 }
