@@ -7,16 +7,13 @@ use sqlx::PgPool;
 
 pub(crate) mod router {
     use super::*;
-    use axum::routing;
+    use axum::routing::{Router, get};
     use sqlx::{Pool, Postgres};
 
-    pub fn new(pool: &Pool<Postgres>) -> routing::Router {
-        routing::Router::new()
-            .route("/", routing::post(create))
-            .route("/", routing::get(get_all))
-            .route("/{id}", routing::get(get_one))
-            .route("/{id}", routing::put(update))
-            .route("/{id}", routing::delete(delete))
+    pub fn new(pool: &Pool<Postgres>) -> Router {
+        Router::new()
+            .route("/", get(get_all).post(create))
+            .route("/{id}", get(get_one).put(update).delete(delete))
             .with_state(pool.clone())
     }
 }

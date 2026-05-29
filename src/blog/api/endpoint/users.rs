@@ -7,12 +7,12 @@ use sqlx::PgPool;
 
 pub(crate) mod router {
     use super::*;
-    use axum::routing;
+    use axum::routing::{Router, get};
     use sqlx::{Pool, Postgres};
 
-    pub fn new(pool: &Pool<Postgres>) -> routing::Router {
-        routing::Router::new()
-            .route("/{id}", routing::get(get))
+    pub fn new(pool: &Pool<Postgres>) -> Router {
+        Router::new()
+            .route("/{id}", get(get_one))
             .with_state(pool.clone())
     }
 }
@@ -30,7 +30,10 @@ mod response {
     }
 }
 
-async fn get(Path(user_id): Path<i64>, State(pool): State<PgPool>) -> Result<Json<response::User>> {
+async fn get_one(
+    Path(user_id): Path<i64>,
+    State(pool): State<PgPool>,
+) -> Result<Json<response::User>> {
     let user = sqlx::query_as!(
         response::User,
         "SELECT first_name, last_name, email, location, bio

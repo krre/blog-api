@@ -5,12 +5,12 @@ use std::sync::Arc;
 
 pub(crate) mod router {
     use super::*;
-    use axum::routing;
+    use axum::routing::{Router, post};
     use sqlx::{Pool, Postgres};
 
-    pub fn new(pool: &Pool<Postgres>) -> routing::Router {
-        routing::Router::new()
-            .route("/login", routing::post(login))
+    pub fn new(pool: &Pool<Postgres>) -> Router {
+        Router::new()
+            .route("/login", post(login))
             .with_state(pool.clone())
     }
 }
