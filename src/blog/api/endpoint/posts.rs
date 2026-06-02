@@ -7,13 +7,15 @@ use sqlx::PgPool;
 
 pub(crate) mod router {
     use super::*;
-    use axum::routing::{Router, get};
+    use axum::routing::{Router, get, patch};
     use sqlx::{Pool, Postgres};
 
     pub fn new(pool: &Pool<Postgres>) -> Router {
         Router::new()
             .route("/", get(get_all).post(create))
             .route("/{id}", get(get_one).put(update).delete(delete))
+            .route("/{id}/publish", patch(publish))
+            .route("/{id}/hide", patch(hide))
             .with_state(pool.clone())
     }
 }
@@ -116,6 +118,25 @@ pub async fn get_one(
     .await?;
 
     Ok(Json(post))
+}
+
+pub async fn publish(Path(id): Path<i64>, State(pool): State<PgPool>) -> Result<()> {
+    sqlx::query!(
+        "UPDATE posts SET published_at = current_timestamp WHERE id = $1",
+        id
+    )
+    .execute(&pool)
+    .await?;
+
+    Ok(())
+}
+
+pub async fn hide(Path(id): Path<i64>, State(pool): State<PgPool>) -> Result<()> {
+    sqlx::query!("UPDATE posts SET published_at = null WHERE id = $1", id)
+        .execute(&pool)
+        .await?;
+
+    Ok(())
 }
 
 pub async fn delete(Path(id): Path<i64>, State(pool): State<PgPool>) -> Result<()> {
