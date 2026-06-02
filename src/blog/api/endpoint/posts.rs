@@ -42,9 +42,8 @@ mod response {
     pub struct ListPost {
         pub id: i64,
         pub title: String,
-        pub is_published: bool,
-        #[serde(with = "time::serde::rfc3339")]
-        pub created_at: OffsetDateTime,
+        #[serde(with = "time::serde::rfc3339::option")]
+        pub published_at: Option<OffsetDateTime>,
     }
 
     #[derive(Serialize)]
@@ -84,9 +83,10 @@ pub async fn create(
 pub async fn get_all(State(pool): State<PgPool>) -> Result<Json<Vec<response::ListPost>>> {
     let posts = sqlx::query_as!(
         response::ListPost,
-        "SELECT id, title, is_published, created_at
+        "SELECT id, title, published_at
         FROM posts
-        ORDER BY updated_at DESC",
+        WHERE is_published = true
+        ORDER BY published_at DESC",
     )
     .fetch_all(&pool)
     .await?;
