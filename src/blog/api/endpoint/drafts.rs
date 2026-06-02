@@ -32,7 +32,7 @@ pub async fn get_all(State(pool): State<PgPool>) -> Result<Json<Vec<response::Dr
         response::Draft,
         "SELECT id, title, created_at
         FROM posts
-        WHERE is_published = false
+        WHERE published_at IS NULL
         ORDER BY created_at DESC",
     )
     .fetch_all(&pool)
