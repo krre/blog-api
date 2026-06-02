@@ -27,7 +27,6 @@ mod request {
     pub struct Post {
         pub title: String,
         pub post: String,
-        pub is_published: bool,
     }
 }
 
@@ -67,21 +66,14 @@ pub async fn create(
     AuthUser(user_id): AuthUser,
     payload: axum::extract::Json<request::Post>,
 ) -> Result<Json<response::PostId>> {
-    let published_at: Option<time::OffsetDateTime> = if payload.is_published {
-        Some(time::OffsetDateTime::now_utc())
-    } else {
-        None
-    };
-
     let post = sqlx::query_as!(
         response::PostId,
-        "INSERT INTO posts (title, post, user_id, created_at, updated_at, published_at)
-        VALUES ($1, $2, $3, current_timestamp, current_timestamp, $4)
+        "INSERT INTO posts (title, post, user_id, created_at, updated_at)
+        VALUES ($1, $2, $3, current_timestamp, current_timestamp)
         RETURNING id",
         payload.title,
         payload.post,
         user_id,
-        published_at,
     )
     .fetch_one(&pool)
     .await?;
@@ -122,7 +114,9 @@ pub async fn get_one(
 
 pub async fn publish(Path(id): Path<i64>, State(pool): State<PgPool>) -> Result<()> {
     sqlx::query!(
-        "UPDATE posts SET published_at = current_timestamp WHERE id = $1",
+        "UPDATE posts
+        SET published_at = current_timestamp
+        WHERE id = $1",
         id
     )
     .execute(&pool)
@@ -132,9 +126,14 @@ pub async fn publish(Path(id): Path<i64>, State(pool): State<PgPool>) -> Result<
 }
 
 pub async fn hide(Path(id): Path<i64>, State(pool): State<PgPool>) -> Result<()> {
-    sqlx::query!("UPDATE posts SET published_at = null WHERE id = $1", id)
-        .execute(&pool)
-        .await?;
+    sqlx::query!(
+        "UPDATE posts
+        SET published_at = null
+        WHERE id = $1",
+        id
+    )
+    .execute(&pool)
+    .await?;
 
     Ok(())
 }
@@ -152,17 +151,12 @@ pub async fn update(
     State(pool): State<PgPool>,
     payload: axum::extract::Json<request::Post>,
 ) -> Result<()> {
-    let published_at: Option<time::OffsetDateTime> = if payload.is_published {
-        Some(time::OffsetDateTime::now_utc())
-    } else {
-        None
-    };
-
     sqlx::query!(
-        "UPDATE posts SET title = $1, post = $2, updated_at = current_timestamp, published_at = $3 WHERE id = $4",
+        "UPDATE posts
+        SET title = $1, post = $2, updated_at = current_timestamp
+        WHERE id = $3",
         payload.title,
         payload.post,
-        published_at,
         id,
     )
     .execute(&pool)
