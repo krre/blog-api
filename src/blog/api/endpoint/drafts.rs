@@ -1,4 +1,4 @@
-use crate::api::Result;
+use crate::api::{Result, endpoint::ListPost};
 use axum::{Json, extract::State};
 use sqlx::PgPool;
 
@@ -14,23 +14,10 @@ pub(crate) mod router {
     }
 }
 
-mod response {
-    use serde::Serialize;
-    use time::OffsetDateTime;
-
-    #[derive(Serialize)]
-    pub struct Draft {
-        pub id: i64,
-        pub title: String,
-        #[serde(with = "time::serde::rfc3339")]
-        pub created_at: OffsetDateTime,
-    }
-}
-
-pub async fn get_all(State(pool): State<PgPool>) -> Result<Json<Vec<response::Draft>>> {
+pub async fn get_all(State(pool): State<PgPool>) -> Result<Json<Vec<ListPost>>> {
     let posts = sqlx::query_as!(
-        response::Draft,
-        "SELECT id, title, created_at
+        ListPost,
+        "SELECT id, title, created_at AS posted_at
         FROM posts
         WHERE published_at IS NULL
         ORDER BY created_at DESC",

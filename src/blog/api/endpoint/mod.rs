@@ -5,8 +5,10 @@ pub mod profile;
 pub mod users;
 
 use axum::{Extension, middleware, routing::IntoMakeService};
+use serde::Serialize;
 use sqlx::{Pool, Postgres};
 use std::sync::Arc;
+use time::OffsetDateTime;
 
 use crate::api::middleware::console::log_request_response;
 
@@ -16,6 +18,14 @@ pub struct Router {
 
 pub struct JwtExt {
     pub secret: String,
+}
+
+#[derive(Serialize)]
+pub struct ListPost {
+    pub id: i64,
+    pub title: String,
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub posted_at: Option<OffsetDateTime>,
 }
 
 impl Router {

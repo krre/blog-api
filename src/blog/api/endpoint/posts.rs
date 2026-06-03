@@ -1,4 +1,4 @@
-use crate::api::{Result, extract::AuthUser};
+use crate::api::{Result, endpoint::ListPost, extract::AuthUser};
 use axum::{
     Json,
     extract::{Path, State},
@@ -40,14 +40,6 @@ mod response {
     }
 
     #[derive(Serialize)]
-    pub struct ListPost {
-        pub id: i64,
-        pub title: String,
-        #[serde(with = "time::serde::rfc3339::option")]
-        pub published_at: Option<OffsetDateTime>,
-    }
-
-    #[derive(Serialize)]
     pub struct Post {
         pub id: i64,
         pub title: String,
@@ -81,10 +73,10 @@ pub async fn create(
     Ok(Json(post))
 }
 
-pub async fn get_all(State(pool): State<PgPool>) -> Result<Json<Vec<response::ListPost>>> {
+pub async fn get_all(State(pool): State<PgPool>) -> Result<Json<Vec<ListPost>>> {
     let posts = sqlx::query_as!(
-        response::ListPost,
-        "SELECT id, title, published_at
+        ListPost,
+        "SELECT id, title, published_at AS posted_at
         FROM posts
         WHERE published_at IS NOT NULL
         ORDER BY published_at DESC",
