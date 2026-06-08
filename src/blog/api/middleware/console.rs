@@ -27,8 +27,9 @@ pub async fn log_request_response(
         .map(|s| s.to_string())
         .unwrap_or_else(|| "Unknown".to_string());
 
-    let path = parts.uri.path().to_string();
-    let bytes = buffer_and_print(Direction::Request, &method, &client_ip, &path, body).await?;
+    let path = parts.uri.clone();
+    let path_str = path.path_and_query().map_or("", |v| v.as_str());
+    let bytes = buffer_and_print(Direction::Request, &method, &client_ip, path_str, body).await?;
     let req = Request::from_parts(parts, Body::from(bytes));
 
     let res = next.run(req).await;
@@ -38,7 +39,7 @@ pub async fn log_request_response(
         Direction::Response(parts.status),
         &method,
         &client_ip,
-        &path,
+        path_str,
         body,
     )
     .await?;
