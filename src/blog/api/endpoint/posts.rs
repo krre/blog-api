@@ -1,8 +1,9 @@
 use crate::api::{Result, endpoint::ListPost, extract::AuthUser};
 use axum::{
     Json,
-    extract::{Path, State},
+    extract::{Path, Query, State},
 };
+use serde::Deserialize;
 use sqlx::PgPool;
 
 pub(crate) mod router {
@@ -73,13 +74,26 @@ pub async fn create(
     Ok(Json(post))
 }
 
-pub async fn get_all(State(pool): State<PgPool>) -> Result<Json<Vec<ListPost>>> {
+#[derive(Debug, Deserialize, Default)]
+pub struct Pagination {
+    pub offset: i64,
+    pub limit: i64,
+}
+
+pub async fn get_all(
+    pagination: Query<Pagination>,
+    State(pool): State<PgPool>,
+) -> Result<Json<Vec<ListPost>>> {
     let posts = sqlx::query_as!(
         ListPost,
         "SELECT id, title, published_at AS posted_at
         FROM posts
         WHERE published_at IS NOT NULL
-        ORDER BY published_at DESC",
+        ORDER BY published_at DESC
+        OFFSET $1
+        LIMIT $2",
+        pagination.offset,
+        pagination.limit
     )
     .fetch_all(&pool)
     .await?;
