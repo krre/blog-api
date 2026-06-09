@@ -1,13 +1,12 @@
 use crate::api::{
     Result,
-    endpoint::{ListPost, Posts},
+    endpoint::{ListPost, Pagination, Posts},
     extract::AuthUser,
 };
 use axum::{
     Json,
     extract::{Path, Query, State},
 };
-use serde::Deserialize;
 use sqlx::PgPool;
 
 pub(crate) mod router {
@@ -76,12 +75,6 @@ pub async fn create(
     .await?;
 
     Ok(Json(post))
-}
-
-#[derive(Debug, Deserialize, Default)]
-pub struct Pagination {
-    pub offset: i64,
-    pub limit: i64,
 }
 
 pub async fn get_all(

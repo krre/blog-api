@@ -5,7 +5,7 @@ pub mod profile;
 pub mod users;
 
 use axum::{Extension, middleware, routing::IntoMakeService};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 use std::sync::Arc;
 use time::OffsetDateTime;
@@ -32,6 +32,12 @@ pub struct ListPost {
     pub title: String,
     #[serde(with = "time::serde::rfc3339::option")]
     pub posted_at: Option<OffsetDateTime>,
+}
+
+#[derive(Debug, Deserialize, Default)]
+pub struct Pagination {
+    pub offset: i64,
+    pub limit: i64,
 }
 
 impl Router {
