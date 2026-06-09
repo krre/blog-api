@@ -21,6 +21,12 @@ pub struct JwtExt {
 }
 
 #[derive(Serialize)]
+pub struct Posts {
+    posts: Vec<ListPost>,
+    count: i64,
+}
+
+#[derive(Serialize)]
 pub struct ListPost {
     pub id: i64,
     pub title: String,

@@ -1,4 +1,8 @@
-use crate::api::{Result, endpoint::ListPost, extract::AuthUser};
+use crate::api::{
+    Result,
+    endpoint::{ListPost, Posts},
+    extract::AuthUser,
+};
 use axum::{
     Json,
     extract::{Path, Query, State},
@@ -83,7 +87,7 @@ pub struct Pagination {
 pub async fn get_all(
     pagination: Query<Pagination>,
     State(pool): State<PgPool>,
-) -> Result<Json<Vec<ListPost>>> {
+) -> Result<Json<Posts>> {
     let posts = sqlx::query_as!(
         ListPost,
         "SELECT id, title, published_at AS posted_at
@@ -98,7 +102,16 @@ pub async fn get_all(
     .fetch_all(&pool)
     .await?;
 
-    Ok(Json(posts))
+    let count_query = sqlx::query!(
+        "SELECT count(*)
+        FROM posts
+        WHERE published_at IS NOT NULL"
+    )
+    .fetch_one(&pool)
+    .await?;
+    let count = count_query.count.unwrap_or(0);
+
+    Ok(Json(Posts { posts, count }))
 }
 
 pub async fn get_one(
