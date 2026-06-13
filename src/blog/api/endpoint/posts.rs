@@ -124,7 +124,11 @@ pub async fn get_one(
     Ok(Json(post))
 }
 
-pub async fn publish(Path(id): Path<i64>, State(pool): State<PgPool>) -> Result<()> {
+pub async fn publish(
+    Path(id): Path<i64>,
+    State(pool): State<PgPool>,
+    AuthUser(_): AuthUser,
+) -> Result<()> {
     sqlx::query!(
         "UPDATE posts
         SET published_at = current_timestamp
@@ -137,7 +141,11 @@ pub async fn publish(Path(id): Path<i64>, State(pool): State<PgPool>) -> Result<
     Ok(())
 }
 
-pub async fn hide(Path(id): Path<i64>, State(pool): State<PgPool>) -> Result<()> {
+pub async fn hide(
+    Path(id): Path<i64>,
+    State(pool): State<PgPool>,
+    AuthUser(_): AuthUser,
+) -> Result<()> {
     sqlx::query!(
         "UPDATE posts
         SET published_at = null
@@ -150,7 +158,11 @@ pub async fn hide(Path(id): Path<i64>, State(pool): State<PgPool>) -> Result<()>
     Ok(())
 }
 
-pub async fn delete(Path(id): Path<i64>, State(pool): State<PgPool>) -> Result<()> {
+pub async fn delete(
+    Path(id): Path<i64>,
+    State(pool): State<PgPool>,
+    AuthUser(_): AuthUser,
+) -> Result<()> {
     sqlx::query!("DELETE FROM posts WHERE id = $1", id)
         .execute(&pool)
         .await?;
@@ -161,6 +173,7 @@ pub async fn delete(Path(id): Path<i64>, State(pool): State<PgPool>) -> Result<(
 pub async fn update(
     Path(id): Path<i64>,
     State(pool): State<PgPool>,
+    AuthUser(_): AuthUser,
     payload: axum::extract::Json<request::Post>,
 ) -> Result<()> {
     sqlx::query!(

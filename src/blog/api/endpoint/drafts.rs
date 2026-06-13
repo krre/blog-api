@@ -1,6 +1,7 @@
 use crate::api::{
     Result,
     endpoint::{ListPost, Pagination, Posts},
+    extract::AuthUser,
 };
 use axum::{
     Json,
@@ -23,6 +24,7 @@ pub(crate) mod router {
 pub async fn get_all(
     pagination: Query<Pagination>,
     State(pool): State<PgPool>,
+    AuthUser(_): AuthUser,
 ) -> Result<Json<Posts>> {
     let posts = sqlx::query_as!(
         ListPost,
