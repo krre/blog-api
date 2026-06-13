@@ -1,0 +1,27 @@
+info:
+  name: Update profile
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{host}}/profile"
+  body:
+    type: json
+    data: |-
+      {
+        "username": "admin",
+        "first_name": "{{user.first_name}}",
+        "last_name": "{{user.last_name}}",
+        "email": "{{user.email}}",
+        "telegram": "{{user.telegram}}",
+        "location": "{{user.location}}",
+        "bio": "{{user.bio}}"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

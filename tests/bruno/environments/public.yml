@@ -1,0 +1,22 @@
+name: public
+variables:
+  - name: post.title
+    value: Post title
+  - name: post.text
+    value: Post text
+  - name: post.id
+    value: 1
+  - name: user.first_name
+    value: John
+  - name: user.last_name
+    value: Doe
+  - name: user.email
+    value: john@example.com
+  - name: user.telegram
+    value: https://t.me/johndoe
+  - name: user.location
+    value: Earth
+  - name: user.bio
+    value: Developer
+
+

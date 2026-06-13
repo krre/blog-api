@@ -1,0 +1,36 @@
+opencollection: 1.0.0
+
+info:
+  name: blog
+config:
+  proxy:
+    inherit: true
+    config:
+      protocol: http
+      hostname: ""
+      port: ""
+      auth:
+        username: ""
+        password: ""
+      bypassProxy: ""
+
+request:
+  headers:
+    - name: Content-Type
+      value: application/json
+  auth:
+    type: bearer
+    token: "{{process.env.jwt}}"
+  variables:
+    - name: host
+      value: "{{process.env.host}}"
+bundled: false
+extensions:
+  bruno:
+    ignore:
+      - node_modules
+      - .git
+    presets:
+      request:
+        type: http
+        url: "{{host}}"

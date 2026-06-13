@@ -1,0 +1,26 @@
+info:
+  name: Login
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{host}}/auth/login"
+  body:
+    type: json
+    data: |-
+      {
+        "username": "admin",
+        "password": "{{auth.password}}"
+      }
+
+runtime:
+  variables:
+    - name: auth.password
+      value: "{{process.env.password}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,22 @@
+info:
+  name: Get drafts
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: "{{host}}/drafts?limit=20&offset=0"
+  params:
+    - name: limit
+      value: "20"
+      type: query
+    - name: offset
+      value: "0"
+      type: query
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

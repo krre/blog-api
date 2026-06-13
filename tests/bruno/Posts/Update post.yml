@@ -1,0 +1,22 @@
+info:
+  name: Update post
+  type: http
+  seq: 2
+
+http:
+  method: PUT
+  url: "{{host}}/posts/{{post.id}}"
+  body:
+    type: json
+    data: |-
+      {
+        "title": "{{post.title}}",
+        "post": "{{post.text}}"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

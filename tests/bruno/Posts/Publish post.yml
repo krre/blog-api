@@ -1,0 +1,15 @@
+info:
+  name: Publish post
+  type: http
+  seq: 6
+
+http:
+  method: PATCH
+  url: "{{host}}/posts/{{post.id}}/publish"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
