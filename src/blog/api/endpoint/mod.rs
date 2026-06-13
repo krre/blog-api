@@ -21,6 +21,19 @@ pub struct JwtExt {
 }
 
 #[derive(Serialize)]
+pub struct Post {
+    pub id: i64,
+    pub title: String,
+    pub post: String,
+    #[serde(with = "time::serde::rfc3339")]
+    pub created_at: OffsetDateTime,
+    #[serde(with = "time::serde::rfc3339")]
+    pub updated_at: OffsetDateTime,
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub published_at: Option<OffsetDateTime>,
+}
+
+#[derive(Serialize)]
 pub struct Posts {
     posts: Vec<ListPost>,
     count: i64,

@@ -1,6 +1,6 @@
 use crate::api::{
     Result,
-    endpoint::{ListPost, Pagination, Posts},
+    endpoint::{ListPost, Pagination, Post, Posts},
     extract::AuthUser,
 };
 use axum::{
@@ -36,24 +36,10 @@ mod request {
 
 mod response {
     use serde::Serialize;
-    use time::OffsetDateTime;
 
     #[derive(Serialize)]
     pub struct PostId {
         pub id: i64,
-    }
-
-    #[derive(Serialize)]
-    pub struct Post {
-        pub id: i64,
-        pub title: String,
-        pub post: String,
-        #[serde(with = "time::serde::rfc3339")]
-        pub created_at: OffsetDateTime,
-        #[serde(with = "time::serde::rfc3339")]
-        pub updated_at: OffsetDateTime,
-        #[serde(with = "time::serde::rfc3339::option")]
-        pub published_at: Option<OffsetDateTime>,
     }
 }
 
@@ -107,15 +93,12 @@ pub async fn get_all(
     Ok(Json(Posts { posts, count }))
 }
 
-pub async fn get_one(
-    Path(id): Path<i64>,
-    State(pool): State<PgPool>,
-) -> Result<Json<response::Post>> {
+pub async fn get_one(Path(id): Path<i64>, State(pool): State<PgPool>) -> Result<Json<Post>> {
     let post = sqlx::query_as!(
-        response::Post,
+        Post,
         "SELECT id, title, post, created_at, updated_at, published_at
         FROM posts
-        WHERE id = $1",
+        WHERE id = $1 AND published_at IS NOT NULL",
         id,
     )
     .fetch_one(&pool)
