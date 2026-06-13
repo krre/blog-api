@@ -1,5 +1,5 @@
 use crate::api::{
-    Result,
+    Error, Result,
     endpoint::{ListPost, Pagination, Post, Posts},
     extract::AuthUser,
 };
@@ -58,7 +58,7 @@ pub async fn get_one(
     State(pool): State<PgPool>,
     AuthUser(_): AuthUser,
 ) -> Result<Json<Post>> {
-    let post = sqlx::query_as!(
+    let result = sqlx::query_as!(
         Post,
         "SELECT id, title, post, created_at, updated_at, published_at
         FROM posts
@@ -66,7 +66,13 @@ pub async fn get_one(
         id,
     )
     .fetch_one(&pool)
-    .await?;
+    .await;
 
-    Ok(Json(post))
+    match result {
+        Ok(post) => Ok(Json(post)),
+        Err(error) => match error {
+            sqlx::Error::RowNotFound => Err(Error::NotFound),
+            _ => Err(Error::DatabaseError(error)),
+        },
+    }
 }
