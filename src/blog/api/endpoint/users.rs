@@ -25,6 +25,7 @@ mod response {
         pub first_name: String,
         pub last_name: String,
         pub email: String,
+        pub telegram: String,
         pub location: String,
         pub bio: String,
     }
@@ -36,7 +37,7 @@ async fn get_one(
 ) -> Result<Json<response::User>> {
     let user = sqlx::query_as!(
         response::User,
-        "SELECT first_name, last_name, email, location, bio
+        "SELECT first_name, last_name, email, telegram, location, bio
         FROM users
         WHERE id = $1",
         user_id

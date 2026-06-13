@@ -24,6 +24,7 @@ mod request {
         pub first_name: String,
         pub last_name: String,
         pub email: String,
+        pub telegram: String,
         pub location: String,
         pub bio: String,
     }
@@ -43,6 +44,7 @@ mod response {
         pub first_name: String,
         pub last_name: String,
         pub email: String,
+        pub telegram: String,
         pub location: String,
         pub bio: String,
     }
@@ -59,7 +61,7 @@ async fn get_one(
 ) -> Result<Json<response::Profile>> {
     let user = sqlx::query_as!(
         response::Profile,
-        "SELECT username, first_name, last_name, email, location, bio
+        "SELECT username, first_name, last_name, email, telegram, location, bio
         FROM users
         WHERE id = $1",
         user_id
@@ -78,10 +80,11 @@ pub async fn update(
 ) -> Result<Json<response::Token>> {
     sqlx::query!(
         "UPDATE users
-        SET first_name = $1, last_name = $2, email = $3, location = $4, bio = $5, updated_at = current_timestamp WHERE id = $6",
+        SET first_name = $1, last_name = $2, email = $3, telegram = $4, location = $5, bio = $6, updated_at = current_timestamp WHERE id = $7",
         payload.first_name,
         payload.last_name,
         payload.email,
+        payload.telegram,
         payload.location,
         payload.bio,
         user_id

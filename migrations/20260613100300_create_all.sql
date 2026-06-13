@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS users (
     last_name text NOT NULL DEFAULT '',
     password_hash text NOT NULL DEFAULT '',
     email text NOT NULL UNIQUE DEFAULT '',
+    telegram text NOT NULL DEFAULT '',
     location text NOT NULL DEFAULT '',
     bio text NOT NULL DEFAULT '',
     created_at timestamptz NOT NULL DEFAULT now(),
