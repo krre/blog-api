@@ -6,10 +6,8 @@ ARG APP_NAME=blog
 FROM rust:${RUST_VERSION}-alpine AS build
 ARG APP_NAME
 WORKDIR /app
-
 RUN apk add --no-cache musl-dev
 ENV SQLX_OFFLINE=true
-
 RUN --mount=type=bind,source=migrations,target=migrations \
     --mount=type=bind,source=.sqlx,target=.sqlx \
     --mount=type=bind,source=src,target=src \
@@ -22,7 +20,6 @@ RUN --mount=type=bind,source=migrations,target=migrations \
     cp ./target/release/$APP_NAME /bin/app
 
 FROM alpine:3.18 AS final
-
 ARG UID=10001
 RUN adduser \
     --disabled-password \
@@ -33,7 +30,7 @@ RUN adduser \
     --uid "${UID}" \
     appuser
 USER appuser
-
 COPY --from=build /bin/app /usr/local/bin/app
+
 EXPOSE 3000
 CMD ["app"]
