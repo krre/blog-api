@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE posts\n        SET published_at = null\n        WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "88e31862d5ea3655dad4683321a16bc0f3226b799f8aa5706241995aa1ec7f05"
+}

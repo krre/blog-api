@@ -1,0 +1,58 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT username, first_name, last_name, email, telegram, location, bio\n        FROM users\n        WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "username",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "first_name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "last_name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "email",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "telegram",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "location",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "bio",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "64ab89a2c49b88819b6a5ba3510c79df97621da234f72020e72b9042bd631959"
+}
